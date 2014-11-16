@@ -2,6 +2,7 @@ from bs4 import BeautifulSoup
 from urllib2 import urlopen
 from sys import argv
 from os import makedirs, chdir
+from re import sub
 
 
 if(len(argv) < 2):
@@ -11,10 +12,19 @@ if(len(argv) < 2):
 html = urlopen(argv[1]).read()
 soup = BeautifulSoup(html, 'lxml')
 
-title = soup.find(id='blogg').table.tr.td.contents[1].string
-makedirs(title), chdir(title)
-file = open('myfile.dat', 'w+')
+blog_name = soup.find(id='blogg').table.tr.td.contents[1].string
+makedirs(blog_name), chdir(blog_name)
 
-for post in soup.find_all(id='inlagg'):
-  # print post
-  pass
+for counter, post in enumerate(soup.find(id='inlagg')):
+#  makedirs(str(counter))
+#  chdir(str(counter))
+  title = post.div.text.strip()
+  filename = str(counter) + '-' + sub('[^0-9a-zA-Z]+', '-', title)
+  print filename
+  makedirs(filename), chdir(filename)
+  with open(filename + '.txt', 'w+') as file:
+    file.write(title.encode('utf-8'))
+    file.write(post.contents[4].text.encode('utf-8'))
+  chdir('..')
+  #makedirs(title), chdir(title)
+  #pass

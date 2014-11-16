@@ -14,7 +14,7 @@ def download_img(id):
 
 
 def cleanup(str):
-  return ' '.join(str.split()).encode('utf-8').strip()
+  return ' '.join(str.encode('utf-8').split()).strip()
 
 
 def main(blog_name):
@@ -38,13 +38,12 @@ def main(blog_name):
     makedirs(filename), chdir(filename)
     with open(filename_cleaned.encode('utf-8') + '.txt', 'w+') as file:
       print >> file, title.encode('utf-8'), '\n'
-      paragraphs = post.contents[4].find_all(['p', 'li'])
+      paragraphs = post.contents[4].find_all(['p', 'li', 'div', 'table'])
       if not paragraphs:
         # Ever heard of semantic web?
-        print >> file, cleanup(post.contents[4].text), '\n'
+        print >> file, post.contents[4].text.encode('utf-8'), '\n'
       for p in paragraphs:
-        if not p.text.isspace():
-          print >> file, cleanup(p.text), '\n'
+        print >> file, cleanup(p.text), '\n'
       for img in post.select('div:nth-of-type(2) a img'):
         print img['src']
         download_img(search(r'id=([0-9]+)[&]', img['src']).group(1))

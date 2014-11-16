@@ -2,7 +2,8 @@ from bs4 import BeautifulSoup
 from urllib2 import urlopen
 from sys import argv
 from os import makedirs, chdir
-from re import sub
+from re import sub, search
+from datetime import datetime
 
 
 if(len(argv) < 2):
@@ -13,18 +14,19 @@ html = urlopen(argv[1]).read()
 soup = BeautifulSoup(html, 'lxml')
 
 blog_name = soup.find(id='blogg').table.tr.td.contents[1].string
-makedirs(blog_name), chdir(blog_name)
+#makedirs(blog_name), chdir(blog_name)
 
 for counter, post in enumerate(soup.find(id='inlagg')):
-#  makedirs(str(counter))
-#  chdir(str(counter))
+  print post.prettify()
   title = post.div.text.strip()
-  filename = str(counter) + '-' + sub('[^0-9a-zA-Z]+', '-', title)
-  print filename
+  byline = post.select('div')[3].text
+  date = search('Tidpunkt:(.+)[|]', byline).group(1).strip()
+  print datetime.strptime(date, '%d / %m - %Y %H:%M').strftime('%y-%m-%d')
+  filename = str(counter) + '-' + sub('\W', '-', title) + '_' + date.strip().encode('utf-8')
+  exit(1)
   makedirs(filename), chdir(filename)
   with open(filename + '.txt', 'w+') as file:
-    file.write(title.encode('utf-8'))
-    file.write(post.contents[4].text.encode('utf-8'))
+    print >> file, title.encode('utf-8'), '\n'
+    for paragraph in post.select('div font p'):
+      print >> file, paragraph.text.encode('utf-8').strip(), '\n'
   chdir('..')
-  #makedirs(title), chdir(title)
-  #pass

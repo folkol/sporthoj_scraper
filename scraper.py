@@ -13,6 +13,10 @@ def download_img(id):
     file.write(img.read())
 
 
+def cleanup(str):
+  return ' '.join(str.split()).encode('utf-8').strip()
+
+
 def main(blog_name):
   html = urlopen('http://www.sporthoj.com/blogg/?' + blog_name).read()
   soup = BeautifulSoup(html, 'lxml')
@@ -22,23 +26,25 @@ def main(blog_name):
 
   for counter, post in enumerate(soup.find(id='inlagg')):
     title = post.div.text.strip()
-    byline = post.select('div[id=publicerad]')[0].text
-    print byline
-    date = search(r'Tidpunkt:(.+)[|]', byline).group(1).strip()
-    date = datetime.strptime(date, '%d / %m - %Y %H:%M').strftime('%y-%m-%d')
+    byline = post.select('div[id=publicerad]')
+    date = '00-00-00'
+    if byline:
+      byline = byline[0].text
+      date = search(r'Tidpunkt:(.+)[|]', byline).group(1).strip()
+      date = datetime.strptime(date, '%d / %m - %Y %H:%M').strftime('%y-%m-%d')
     filename_cleaned = sub('\W', '-', title)
     filename = '{0}_{1}_{2}'.format(counter, date, filename_cleaned).encode('utf-8')
     print filename
     makedirs(filename), chdir(filename)
     with open(filename_cleaned.encode('utf-8') + '.txt', 'w+') as file:
       print >> file, title.encode('utf-8'), '\n'
-      paragraphs = post.select('div:nth-of-type(3) p')
+      paragraphs = post.contents[4].find_all(['p', 'li'])
       if not paragraphs:
-          # Ever heard of semantic web?
-          p=post.select('div:nth-of-type(3)')
-          print >> file, p[0].text.encode('utf-8').strip(), '\n'
+        # Ever heard of semantic web?
+        print >> file, cleanup(post.contents[4].text), '\n'
       for p in paragraphs:
-        print >> file, p.text.encode('utf-8').strip(), '\n'
+        if not p.text.isspace():
+          print >> file, cleanup(p.text), '\n'
       for img in post.select('div:nth-of-type(2) a img'):
         print img['src']
         download_img(search(r'id=([0-9]+)[&]', img['src']).group(1))

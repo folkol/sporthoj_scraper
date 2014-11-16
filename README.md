@@ -6,5 +6,9 @@ foreach "div.inlägg > div"
 
 
 pip install beautifulsoup4
-pip install wget
-python scraper.py http://www.sporthoj.com/blogg/?rockmorsanaventyr
+
+python scraper.py rockmorsanaventyr
+python scraper.py rockmorsan_del1
+python scraper.py rockmorsan_del2
+python scraper.py rockmorsan_del3
+python scraper.py rockmorsan

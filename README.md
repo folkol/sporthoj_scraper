@@ -1,3 +1,8 @@
+Scraper for exporting sporthoj blogs
+------------------------------------
+
+(Readme in Swedish)
+
 Min (manuella) test suite har varit:
 	1) "Kör utan att det smäller för dessa 5 bloggar"
 	2) "~5 random stickprover har varit ok"
